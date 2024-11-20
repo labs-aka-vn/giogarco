@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta name="viewport"
+        content="user-scalable=no, initial-scale=1.0001, maximum-scale=1.0001, width=device-width, minimal-ui shrink-to-fit=no">
+    <meta charset="utf-8" name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap/dist/css/bootstrap.min.css">
+    <script src="https://cdn.form.io/js/formio.embed.js"></script>
+    <script src="https://unpkg.com/@wcj/markdown-to-html/dist/markdown.min.js"></script>
+    <title>🤖 AI Ads Generation 🚀</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f1f1f1;
+        }
+
+        header {
+            background-color: #4285F4;
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+        }
+
+        main {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        footer {
+            background-color: #4285F4;
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        input,
+        textarea {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+
+        button {
+            background-color: #4285F4;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>🤖 Tạo Tin Rao Vặt Nhanh 🚀</h1>
+    </header>
+
+    <main>
+        <div id="formio"></div>
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+        <script>
+            var $ds = {};
+            var template = {
+  "display": "form",
+  "components": [
+    {
+      "label": "Nội dung",
+      "placeholder": "Nội dung NGẮN GỌN mà bạn muốn đăng tin",
+      "description": "Bước 1: Nhập nội dung bạn muốn đăng, viết ngắn gọn<br>\nBước 2: Bấm nút <strong>Tạo Tin</strong>",
+      "applyMaskOn": "change",
+      "tableView": true,
+      "validate": {
+        "required": true
+      },
+      "validateWhenHidden": false,
+      "key": "ads",
+      "type": "textfield",
+      "input": true
+    },
+    {
+      "label": "Tạo Tin",
+      "showValidations": false,
+      "disableOnInvalid": true,
+      "tableView": false,
+      "key": "submit",
+      "type": "button",
+      "saveOnEnter": false,
+      "input": true
+    },
+    {
+      "label": "Bản Tin Rao Vặt (do AI gợi ý)",
+      "description": "Bước 3: Chỉnh sửa nội dung do AI sinh ra cho phù hợp rồi bấm nút <strong>Đăng Tin</strong> để chuyển sang Google Form đăng tin",
+      "applyMaskOn": "change",
+      "editor": "ckeditor",
+      "autoExpand": false,
+      "tableView": true,
+      "validateWhenHidden": false,
+      "key": "detail",
+      "type": "textarea",
+      "isUploadEnabled": false,
+      "input": true
+    },
+    {
+      "label": "Đăng Tin",
+      "action": "custom",
+      "showValidations": false,
+      "tableView": false,
+      "key": "dangTin",
+      "customConditional": "show = data.detail;",
+      "type": "button",
+      "input": true
+    }
+  ]
+};
+            $(function () {
+                var title, desc;
+                Formio.createForm(document.getElementById("formio"), template)
+                    .then(function (form) {
+                        // Prevent the submission from going to the form.io server.
+                        form.nosubmit = true;
+
+                        // Triggered when they click the submit button.
+                        form.on('submit', function (submission) {
+                            $.ajax({
+                                url: "https://api.voids.top/v1/chat/completions",
+                                method: "POST",
+                                contentType: "application/json",
+                                dataType: "json", // Specify expected response data type
+                                data: JSON.stringify({
+                                    "model": "gemini-1.5-flash-exp-0827",
+                                    "messages": [
+                                        {
+                                            "role": "user",
+                                            "content": `Nội dung rao vặt: ${submission.data.ads} .Viết lại nội dung rao rặt trên thành bản tin quảng cáo nội dung hấp dẫn hơn.`
+                                        },
+                                        {
+                                            "role": "system",
+                                            "content": "Viết nội dung bằng tiếng Việt"
+                                        }
+                                    ]
+                                }),
+                                success: function (response) {
+                                    form.emit("submitDone");
+                                    console.log(response);
+                                    const elements = response.choices[0].message.content.split("---");
+                                    console.log(elements[0].trim());
+                                    const post = markdown.default(elements[0].trim());
+                                    const note = elements[1] ? markdown.default(elements[1].trim()) : "";
+                                    form.getComponent("detail").setValue(post);
+                                    console.log(post);
+                                    let lines = html2text(post).split('\n').filter(i => i.trim().length);
+                                    title = lines[0];
+                                    console.log(title);
+                                    desc = lines.slice(1).join("\n");
+                                    console.log(desc);
+                                    console.log(note);
+                                    form.getComponent("note").setValue(note);
+                                },
+                                error: function (error) {
+                                    alert(error.message);
+                                }
+                            });
+                        });
+                    });
+            });
+
+            function html2text(html) {
+                html = html.replace(/<style([\s\S]*?)<\/style>/gi, "");
+                html = html.replace(/<script([\s\S]*?)<\/script>/gi, "");
+                html = html.replace(/<\/div>/ig, "\n");
+                html = html.replace(/<li>/ig, "  ✔️  ");
+                html = html.replace(/<\/li>/ig, "\n");
+                html = html.replace(/<\/ul>/ig, "\n");
+                html = html.replace(/<\/p>/ig, "\n");
+                html = html.replace(/<br\s*[\/]?>/gi, "\n");
+                html = html.replace(/<[^>]+>/ig, "");
+                return html;
+            }
+        </script>
+    </main>
+
+    <footer>
+        &copy; 2023 CÔNG TY CỔ PHẦN MAY & THƯƠNG MẠI GIO LINH
+    </footer>
+</body>
+
+</html>
