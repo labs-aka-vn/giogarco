@@ -32,6 +32,7 @@
             background-color: #fff;
             border-radius: 5px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            height: 100%;
         }
 
         footer {
@@ -39,36 +40,8 @@
             color: #fff;
             padding: 20px;
             text-align: center;
-            position: fixed;
             bottom: 0;
             width: 100%;
-        }
-
-        form {
-            display: flex;
-            flex-direction: column;
-        }
-
-        label {
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-
-        input,
-        textarea {
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            margin-bottom: 10px;
-        }
-
-        button {
-            background-color: #4285F4;
-            color: #fff;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
         }
     </style>
 </head>
@@ -136,13 +109,14 @@
                     }
                 ]
             };
-            var title, desc;
+            var title, desc, curForm;
             $(function () {
 
                 Formio.createForm(document.getElementById("formio"), template)
                     .then(function (form) {
                         // Prevent the submission from going to the form.io server.
                         form.nosubmit = true;
+                        curForm = form;
 
                         // Triggered when they click the submit button.
                         form.on('submit', function (submission) {
@@ -173,10 +147,6 @@
                                     const note = elements[1] ? markdown.default(elements[1].trim()) : "";
                                     form.getComponent("detail").setValue(post);
                                     console.log(post);
-                                    let lines = html2text(post).split('\n').filter(i => i.trim().length);
-                                    title = lines[0];
-                                    console.log(title);
-                                    desc = lines.slice(1).join("\n");
                                     console.log(desc);
                                 },
                                 error: function (error) {
@@ -201,6 +171,10 @@
             }
 
             function openForm() {
+                let post = curForm.getComponent("detail").getValue();
+                let lines = html2text(post).split('\n');//.filter(i => i.trim().length);
+                title = lines[0];
+                desc = lines.slice(1).join("\n");
                 let url = "https://docs.google.com/forms/d/e/1FAIpQLSfPO-9LtgKJU498pKfOCyeL9SO4ffDP4EKJbuYIrJVLZlqOag/viewform?usp=pp_url&entry.463909131={title}&entry.2094037014={content}";
                 url = url.replace("{title}", encodeURIComponent(title));
                 url = url.replace("{content}", encodeURIComponent(desc));
