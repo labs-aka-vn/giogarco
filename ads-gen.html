@@ -84,59 +84,61 @@
         <script>
             var $ds = {};
             var template = {
-  "display": "form",
-  "components": [
-    {
-      "label": "Nội dung",
-      "placeholder": "Nội dung NGẮN GỌN mà bạn muốn đăng tin",
-      "description": "Bước 1: Nhập nội dung bạn muốn đăng, viết ngắn gọn<br>\nBước 2: Bấm nút <strong>Tạo Tin</strong>",
-      "applyMaskOn": "change",
-      "tableView": true,
-      "validate": {
-        "required": true
-      },
-      "validateWhenHidden": false,
-      "key": "ads",
-      "type": "textfield",
-      "input": true
-    },
-    {
-      "label": "Tạo Tin",
-      "showValidations": false,
-      "disableOnInvalid": true,
-      "tableView": false,
-      "key": "submit",
-      "type": "button",
-      "saveOnEnter": false,
-      "input": true
-    },
-    {
-      "label": "Bản Tin Rao Vặt (do AI gợi ý)",
-      "description": "Bước 3: Chỉnh sửa nội dung do AI sinh ra cho phù hợp rồi bấm nút <strong>Đăng Tin</strong> để chuyển sang Google Form đăng tin",
-      "applyMaskOn": "change",
-      "editor": "ckeditor",
-      "autoExpand": false,
-      "tableView": true,
-      "validateWhenHidden": false,
-      "key": "detail",
-      "type": "textarea",
-      "isUploadEnabled": false,
-      "input": true
-    },
-    {
-      "label": "Đăng Tin",
-      "action": "custom",
-      "showValidations": false,
-      "tableView": false,
-      "key": "dangTin",
-      "customConditional": "show = data.detail;",
-      "type": "button",
-      "input": true
-    }
-  ]
-};
+                "display": "form",
+                "components": [
+                    {
+                        "label": "Nội dung",
+                        "placeholder": "Nội dung NGẮN GỌN mà bạn muốn đăng tin",
+                        "description": "Bước 1: Nhập nội dung bạn muốn đăng, viết ngắn gọn<br>\nBước 2: Bấm nút <strong>Tạo Tin</strong>",
+                        "applyMaskOn": "change",
+                        "tableView": true,
+                        "validate": {
+                            "required": true
+                        },
+                        "validateWhenHidden": false,
+                        "key": "ads",
+                        "type": "textfield",
+                        "input": true
+                    },
+                    {
+                        "label": "Tạo Tin",
+                        "showValidations": false,
+                        "disableOnInvalid": true,
+                        "tableView": false,
+                        "key": "submit",
+                        "type": "button",
+                        "saveOnEnter": false,
+                        "input": true
+                    },
+                    {
+                        "label": "Bản Tin Rao Vặt (do AI gợi ý)",
+                        "description": "Bước 3: Chỉnh sửa nội dung do AI sinh ra cho phù hợp rồi bấm nút <strong>Đăng Tin</strong> để chuyển sang Google Form đăng tin",
+                        "applyMaskOn": "change",
+                        "editor": "ckeditor",
+                        "autoExpand": false,
+                        "tableView": true,
+                        "validateWhenHidden": false,
+                        "key": "detail",
+                        "type": "textarea",
+                        "isUploadEnabled": false,
+                        "input": true
+                    },
+                    {
+                        "label": "Đăng Tin",
+                        "action": "custom",
+                        "showValidations": false,
+                        "tableView": false,
+                        "key": "dangTin",
+                        "customConditional": "show = data.detail;",
+                        "type": "button",
+                        "input": true,
+                        "custom": "openForm()"
+                    }
+                ]
+            };
+            var title, desc;
             $(function () {
-                var title, desc;
+
                 Formio.createForm(document.getElementById("formio"), template)
                     .then(function (form) {
                         // Prevent the submission from going to the form.io server.
@@ -176,8 +178,6 @@
                                     console.log(title);
                                     desc = lines.slice(1).join("\n");
                                     console.log(desc);
-                                    console.log(note);
-                                    form.getComponent("note").setValue(note);
                                 },
                                 error: function (error) {
                                     alert(error.message);
@@ -198,6 +198,13 @@
                 html = html.replace(/<br\s*[\/]?>/gi, "\n");
                 html = html.replace(/<[^>]+>/ig, "");
                 return html;
+            }
+
+            function openForm() {
+                let url = "https://docs.google.com/forms/d/e/1FAIpQLSfPO-9LtgKJU498pKfOCyeL9SO4ffDP4EKJbuYIrJVLZlqOag/viewform?usp=pp_url&entry.463909131={title}&entry.2094037014={content}";
+                url = url.replace("{title}", encodeURIComponent(title));
+                url = url.replace("{content}", encodeURIComponent(desc));
+                window.open(url, '_blank').focus();
             }
         </script>
     </main>
